@@ -66,6 +66,8 @@ var UIController = (function () {
     inputDescription: ".add__description",
     inputValue: ".add__value",
     inputBtn: ".add__btn",
+    incomeContainer: ".income__list",
+    expensesContainer: ".expenses__list",
   };
 
   // SETTING A PRIVATE'S METHODS
@@ -79,6 +81,43 @@ var UIController = (function () {
     };
   };
 
+  var addListItem = function (obj, type) {
+    var html, element;
+    // create hmtl string with placeholder text
+    if (type === "inc") {
+      element = DOMstrings.incomeContainer;
+
+      html = `<div class="item clearfix" id="income-${obj.id}">
+              <div class="item__description">${obj.description}</div>
+              <div class="right clearfix">
+                <div class="item__value">+ ${obj.value}</div>
+                <div class="item__delete">
+                  <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>
+                </div>
+              </div>
+            </div>`;
+    } else if (type === "exp") {
+      element = DOMstrings.expensesContainer;
+
+      html = `<div class="item clearfix" id="expense-${obj.id}">
+                <div class="item__description">${obj.description}</div>
+                <div class="right clearfix">
+                  <div class="item__value">- ${obj.value}</div>
+                  <div class="item__percentage">21%</div>
+                    <div class="item__delete">
+                      <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>
+                    </div>
+                </div>
+              </div>`;
+    }
+
+    // replace the placeholder text with some actual data
+    // i don't use this, because i use javascript template to avoid it
+
+    // insert the html into the dom
+    document.querySelector(element).insertAdjacentHTML("beforeend", html);
+  };
+
   // return centralize DOM's Strings
   var getDOMstrings = function () {
     return DOMstrings;
@@ -87,6 +126,7 @@ var UIController = (function () {
   // RETURNS DATA'S EXPOSES
   return {
     getInput,
+    addListItem,
     getDOMstrings,
   };
 })();
@@ -124,6 +164,7 @@ var controller = (function (budgetCtrl, UICtrl) {
     newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
     // 3. agregar el item a UIController
+    UICtrl.addListItem(newItem, input.type);
     // 4. calcular el budget
     // 5. mostrar el budget on the ui
   };

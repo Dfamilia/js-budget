@@ -123,11 +123,25 @@ var UIController = (function () {
     return DOMstrings;
   };
 
+  var clearFields = () => {
+    var fields, fieldArr;
+    const { inputDescription, inputValue } = DOMstrings;
+
+    fields = document.querySelectorAll(`${inputDescription}, ${inputValue}`);
+
+    // this convert fields's list into array
+    fieldArr = Array.prototype.slice.call(fields);
+
+    fieldArr.forEach((element) => (element.value = ""));
+    fieldArr[0].focus();
+  };
+
   // RETURNS DATA'S EXPOSES
   return {
     getInput,
     addListItem,
     getDOMstrings,
+    clearFields,
   };
 })();
 
@@ -158,15 +172,18 @@ var controller = (function (budgetCtrl, UICtrl) {
 
     // 1. agarrar los datos del dom
     input = UICtrl.getInput();
-    console.log(input);
 
     // 2. agregar el item a budgetController
     newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
     // 3. agregar el item a UIController
     UICtrl.addListItem(newItem, input.type);
-    // 4. calcular el budget
-    // 5. mostrar el budget on the ui
+
+    // 4. clear fields
+    UICtrl.clearFields();
+
+    // 5. calcular el budget
+    // 6. mostrar el budget on the ui
   };
 
   return {

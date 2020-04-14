@@ -3,17 +3,17 @@
 ////////////////////////////////////////////////////////////////////////
 var budgetController = (() => {
   // some code
-  var Expense = (id, description, value) => {
+  function Expense(id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
-  };
+  }
 
-  var Income = (id, description, value) => {
+  function Income(id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
-  };
+  }
 
   var calculateTotal = (type) => {
     var sum = 0;
@@ -75,6 +75,26 @@ var budgetController = (() => {
     return newItem;
   };
 
+  var deleteItem = (type, id) => {
+    var ids, index;
+    // id = 6
+    // data.allItemts[type][id] don't because is target the index instead of id of the element
+    // ids= [1 2 4 6 8]
+    // index = 3
+
+    // this return  array of allItems[type].id example [0 1 2 3 4]
+    ids = data.allItems[type].map((current) => {
+      return current.id;
+    });
+
+    // this return de index of id target on allItems[type] list [ 0 2 4 8 ] id = 8, index = 3
+    index = ids.indexOf(id);
+
+    if (index !== -1) {
+      data.allItems[type].splice(index, 1);
+    }
+  };
+
   var getBudget = () => {
     return {
       budget: data.budget,
@@ -94,6 +114,7 @@ var budgetController = (() => {
     testing,
     calculateBudget,
     getBudget,
+    deleteItem,
   };
 })();
 
@@ -115,6 +136,7 @@ var UIController = (() => {
     incomeLabel: ".budget__income--value",
     expensesLabel: ".budget__expenses--value",
     percentageLabel: ".budget__expenses--percentage",
+    container: ".container",
   };
 
   // SETTING A PRIVATE'S METHODS
@@ -134,7 +156,7 @@ var UIController = (() => {
     if (type === "inc") {
       element = DOMstrings.incomeContainer;
 
-      html = `<div class="item clearfix" id="income-${obj.id}">
+      html = `<div class="item clearfix" id="inc-${obj.id}">
               <div class="item__description">${obj.description}</div>
               <div class="right clearfix">
                 <div class="item__value">+ ${obj.value}</div>
@@ -146,7 +168,7 @@ var UIController = (() => {
     } else if (type === "exp") {
       element = DOMstrings.expensesContainer;
 
-      html = `<div class="item clearfix" id="expense-${obj.id}">
+      html = `<div class="item clearfix" id="exp-${obj.id}">
                 <div class="item__description">${obj.description}</div>
                 <div class="right clearfix">
                   <div class="item__value">- ${obj.value}</div>
@@ -163,6 +185,13 @@ var UIController = (() => {
 
     // insert the html into the dom
     document.querySelector(element).insertAdjacentHTML("beforeend", html);
+  };
+
+  var deleteListItem = (selectorID) => {
+    var child;
+
+    child = document.getElementById(selectorID);
+    child.parentNode.removeChild(child);
   };
 
   // return centralize DOM's Strings
@@ -203,6 +232,7 @@ var UIController = (() => {
     getDOMstrings,
     clearFields,
     displayBudget,
+    deleteListItem,
   };
 })();
 
@@ -225,6 +255,11 @@ var controller = ((budgetCtrl, UICtrl) => {
         ctrlAddItem();
       }
     });
+
+    // using event delegations
+    document
+      .querySelector(DOM.container)
+      .addEventListener("click", ctrlDeleteItem);
   };
 
   var updateBudget = () => {
@@ -257,6 +292,27 @@ var controller = ((budgetCtrl, UICtrl) => {
       UICtrl.clearFields();
 
       // 5. calculate and update de budget
+      updateBudget();
+    }
+  };
+
+  var ctrlDeleteItem = (event) => {
+    var itemID, splitID, type, ID;
+
+    itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+    if (itemID) {
+      splitID = itemID.split("-");
+      type = splitID[0];
+      ID = parseInt(splitID[1]);
+
+      // 1. Delete the item from the data structure
+      budgetCtrl.deleteItem(type, ID);
+
+      // 2. Delete the item from the UI
+      UICtrl.deleteListItem(itemID);
+
+      // 3. Update and show the new budget
       updateBudget();
     }
   };

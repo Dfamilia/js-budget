@@ -175,6 +175,7 @@ var UIController = (() => {
     percentageLabel: ".budget__expenses--percentage",
     container: ".container",
     expPercLabel: ".item__percentage",
+    dateLabel: ".budget__title--month",
   };
 
   // SETTING A PRIVATE'S METHODS
@@ -197,7 +198,7 @@ var UIController = (() => {
       html = `<div class="item clearfix" id="inc-${obj.id}">
               <div class="item__description">${obj.description}</div>
               <div class="right clearfix">
-                <div class="item__value">+ ${obj.value}</div>
+                <div class="item__value">${formatNumber(obj.value, type)}</div>
                 <div class="item__delete">
                   <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>
                 </div>
@@ -209,7 +210,10 @@ var UIController = (() => {
       html = `<div class="item clearfix" id="exp-${obj.id}">
                 <div class="item__description">${obj.description}</div>
                 <div class="right clearfix">
-                  <div class="item__value">- ${obj.value}</div>
+                  <div class="item__value">${formatNumber(
+                    obj.value,
+                    type
+                  )}</div>
                   <div class="item__percentage">21%</div>
                     <div class="item__delete">
                       <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button>
@@ -251,9 +255,21 @@ var UIController = (() => {
   };
 
   var displayBudget = (obj) => {
-    document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-    document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
-    document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+    var type;
+    obj.budget > 0 ? (type = "inc") : (type = "exp");
+
+    document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(
+      obj.budget,
+      type
+    );
+    document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(
+      obj.totalInc,
+      "inc"
+    );
+    document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(
+      obj.totalExp,
+      "exp"
+    );
 
     if (obj.percentage > 0) {
       document.querySelector(DOMstrings.percentageLabel).textContent =
@@ -266,12 +282,6 @@ var UIController = (() => {
   var displayPercentages = (percentages) => {
     var fields = document.querySelectorAll(DOMstrings.expPercLabel);
 
-    var nodeListForEach = (list, callback) => {
-      for (var i = 0; i < list.length; i++) {
-        callback(list[i], i);
-      }
-    };
-
     nodeListForEach(fields, (current, index) => {
       if (percentages[index] > 0) {
         current.textContent = percentages[index] + "%";
@@ -279,6 +289,77 @@ var UIController = (() => {
         current.textContent = "---";
       }
     });
+  };
+
+  var displayMoth = () => {
+    var now, month, months, year;
+
+    now = new Date();
+    // var christmas = new Date(2016, )
+    months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    month = now.getMonth();
+    year = now.getFullYear();
+
+    document.querySelector(DOMstrings.dateLabel).textContent =
+      months[month] + " " + year;
+  };
+
+  var nodeListForEach = (list, callback) => {
+    for (var i = 0; i < list.length; i++) {
+      callback(list[i], i);
+    }
+  };
+
+  var formatNumber = (num, type) => {
+    var numSplit, int, dec, sing;
+    /*
+    + or - before number 
+    exactly 2 decimal points 
+    comma separating the thousands  
+     */
+
+    num = Math.abs(num);
+    num = num.toFixed(2);
+
+    numSplit = num.split(".");
+
+    int = numSplit[0];
+    if (int.length > 3) {
+      int = int.substr(0, int.length - 3) + "," + int.substr(int.length - 3, 3);
+    }
+
+    dec = numSplit[1];
+
+    return (type === "exp" ? "-" : "+") + " " + int + "." + dec;
+  };
+
+  var changedType = () => {
+    var fields = document.querySelectorAll(
+      DOMstrings.inputType +
+        "," +
+        DOMstrings.inputDescription +
+        "," +
+        DOMstrings.inputValue
+    );
+
+    nodeListForEach(fields, (current) => {
+      current.classList.toggle("red-focus");
+    });
+
+    document.querySelector(DOMstrings.inputBtn).classList.toggle("red");
   };
 
   // RETURNS DATA'S EXPOSES
@@ -290,6 +371,9 @@ var UIController = (() => {
     displayBudget,
     deleteListItem,
     displayPercentages,
+    formatNumber,
+    displayMoth,
+    changedType,
   };
 })();
 
@@ -317,6 +401,10 @@ var controller = ((budgetCtrl, UICtrl) => {
     document
       .querySelector(DOM.container)
       .addEventListener("click", ctrlDeleteItem);
+
+    document
+      .querySelector(DOM.inputType)
+      .addEventListener("change", UICtrl.changedType);
   };
 
   var updateBudget = () => {
@@ -401,6 +489,7 @@ var controller = ((budgetCtrl, UICtrl) => {
         totalExp: 0,
         percentage: -1,
       });
+      UICtrl.displayMoth();
 
       setupEventListeners();
 

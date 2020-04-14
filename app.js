@@ -2,43 +2,7 @@
 // BUDGET CONTROLLER
 ////////////////////////////////////////////////////////////////////////
 var budgetController = (() => {
-  // some code
-  function Expense(id, description, value) {
-    this.id = id;
-    this.description = description;
-    this.value = value;
-  }
-
-  function Income(id, description, value) {
-    this.id = id;
-    this.description = description;
-    this.value = value;
-  }
-
-  var calculateTotal = (type) => {
-    var sum = 0;
-
-    data.allItems[type].forEach((cur) => {
-      sum += cur.value;
-    });
-
-    data.totals[type] = sum;
-  };
-
-  var calculateBudget = () => {
-    // calculate total income and expenses
-    calculateTotal("exp");
-    calculateTotal("inc");
-    // calculate the budget income - expenes
-    data.budget = data.totals.inc - data.totals.exp;
-    // calculate the percentage of income that we spent
-    if (data.totals.inc > 0) {
-      data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
-    } else {
-      data.percentage = -1;
-    }
-  };
-
+  // Data structure
   var data = {
     allItems: {
       exp: [],
@@ -51,6 +15,18 @@ var budgetController = (() => {
     budget: 0,
     percentage: -1,
   };
+
+  function Expense(id, description, value) {
+    this.id = id;
+    this.description = description;
+    this.value = value;
+  }
+
+  function Income(id, description, value) {
+    this.id = id;
+    this.description = description;
+    this.value = value;
+  }
 
   var addItem = (type, des, val) => {
     var newItem, ID;
@@ -92,6 +68,30 @@ var budgetController = (() => {
 
     if (index !== -1) {
       data.allItems[type].splice(index, 1);
+    }
+  };
+
+  var calculateTotal = (type) => {
+    var sum = 0;
+
+    data.allItems[type].forEach((cur) => {
+      sum += cur.value;
+    });
+
+    data.totals[type] = sum;
+  };
+
+  var calculateBudget = () => {
+    // calculate total income and expenses
+    calculateTotal("exp");
+    calculateTotal("inc");
+    // calculate the budget income - expenes
+    data.budget = data.totals.inc - data.totals.exp;
+    // calculate the percentage of income that we spent
+    if (data.totals.inc > 0) {
+      data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+    } else {
+      data.percentage = -1;
     }
   };
 
